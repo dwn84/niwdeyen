@@ -1,4 +1,4 @@
-# niwdeyen — Discography
+# niwdeȳen — Discography
 
 8-Bit Nostalgia Crushed by Modern Metal Distortion.
 
