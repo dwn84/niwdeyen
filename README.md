@@ -10,7 +10,7 @@ Chiptune / Metal / Cyberpunk / Industrial
 
 ## Discography
 
-### BitBlight: Metropolis Corruption (EP)
+### [BitBlight: Metropolis Corruption (EP)](https://www.submithub.com/link/niwdeyen-bitblight-metropolis-corruption)
 
 | Track | |
 |-------|---|
@@ -20,7 +20,7 @@ Chiptune / Metal / Cyberpunk / Industrial
 | Critical Hit | [Listen](https://www.submithub.com/link/niwdeyen-critical-hit) |
 | Cipher Decoder | [Listen](https://www.submithub.com/link/niwdeyen-cipher-decoder) |
 
-### BitBlight (LP)
+### BitBlight (CD/LP)
 
 Full album available at [elasticStage](https://elasticstage.com/bitblight/releases/bitblight-album)
 
