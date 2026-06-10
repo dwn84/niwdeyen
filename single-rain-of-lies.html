@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>niwdeyen — RAIN OF LIES</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #050508; color: white;
+    font-family: 'Rajdhani', sans-serif;
+    min-height: 100vh; overflow-x: hidden;
+    position: relative;
+  }
+  #gridCanvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+  .scanlines {
+    position: fixed; inset: 0; z-index: 1; pointer-events: none;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.15) 2px, rgba(0,0,0,0.15) 4px);
+  }
+  .vignette {
+    position: fixed; inset: 0; z-index: 1; pointer-events: none;
+    background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.85) 100%);
+  }
+  #particles { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
+  .main { position: relative; z-index: 2; max-width: 1200px; margin: 0 auto; padding: 40px 20px 60px; display: flex; flex-direction: column; align-items: center; }
+  .header { text-align: center; margin-bottom: 40px; }
+  .artist-logo {
+    max-width: min(70vw, 340px); height: auto; margin-bottom: 8px;
+    filter: drop-shadow(0 0 20px rgba(0,170,255,0.3)) drop-shadow(0 0 60px rgba(0,170,255,0.1));
+  }
+  .subtitle {
+    font-size: clamp(14px,2vw,22px); font-weight: 300;
+    letter-spacing: 0.5em; text-transform: uppercase;
+    color: #00aaff; margin-top: 8px;
+    text-shadow: 0 0 15px #00aaff66;
+  }
+  .tags { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 20px; }
+  .tag {
+    font-family: 'Orbitron', monospace; font-size: 11px; font-weight: 400;
+    letter-spacing: 0.15em; padding: 6px 16px;
+    border: 1px solid; border-radius: 4px; text-transform: uppercase;
+    transition: all 0.3s;
+  }
+  .tag-1 { border-color: #00aaff; color: #00aaff; box-shadow: 0 0 8px #00aaff44; }
+  .tag-2 { border-color: #00cccc; color: #00cccc; box-shadow: 0 0 8px #00cccc44; }
+  .tag:hover { transform: scale(1.05); box-shadow: 0 0 25px currentColor; }
+  .divider {
+    width: 300px; max-width: 80vw; height: 2px;
+    background: linear-gradient(90deg, transparent, #00aaff, #00cccc, transparent);
+    margin: 20px 0 40px;
+    box-shadow: 0 0 20px #00aaff66;
+  }
+  .artwork-wrapper {
+    position: relative; display: inline-block; border-radius: 16px; padding: 6px;
+    background: linear-gradient(135deg, #00aaff, #00cccc, #00aaff);
+    background-size: 300% 300%;
+    animation: borderRotate 4s linear infinite;
+    box-shadow: 0 0 60px #00aaff66, 0 0 120px #00cccc33;
+  }
+  @keyframes borderRotate { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
+  .artwork-wrapper img { display: block; max-width: min(85vw, 540px); height: auto; border-radius: 12px; position: relative; z-index: 1; }
+  .artwork-glitch {
+    position: relative;
+    overflow: hidden;
+    border-radius: 12px;
+    animation: glitchJitter 7s steps(1) infinite;
+  }
+  .artwork-glitch img {
+    display: block;
+    max-width: min(85vw, 540px);
+    height: auto;
+    position: relative;
+    z-index: 1;
+  }
+  .artwork-glitch::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    background-image:
+      repeating-linear-gradient(0deg, transparent, transparent 6px, rgba(0,170,255,0.08) 6px, rgba(0,170,255,0.08) 7px),
+      repeating-linear-gradient(90deg, transparent, transparent 6px, rgba(0,170,255,0.08) 6px, rgba(0,170,255,0.08) 7px);
+    border-radius: 12px;
+    animation: glitchFlicker 6s steps(1) infinite;
+  }
+  .artwork-glitch::after {
+    content: '';
+    position: absolute;
+    left: -10%;
+    right: -10%;
+    z-index: 3;
+    pointer-events: none;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, rgba(0,170,255,0.5), rgba(0,200,255,0.9), rgba(0,170,255,0.5), transparent);
+    box-shadow: 0 0 20px rgba(0,170,255,0.5), 0 0 60px rgba(0,200,255,0.3);
+    animation: scanWave 3s ease-in-out infinite;
+    border-radius: 2px;
+  }
+  @keyframes scanWave {
+    0% { top: -6px; opacity: 0; }
+    4% { opacity: 1; }
+    46% { opacity: 1; }
+    50% { opacity: 0; top: 104%; }
+    54% { opacity: 1; }
+    96% { opacity: 1; }
+    100% { top: 104%; opacity: 0; }
+  }
+  @keyframes glitchFlicker {
+    0%, 87%, 89%, 93%, 95%, 100% { opacity: 1; }
+    88% { opacity: 0.4; }
+    90% { opacity: 0.7; }
+    94% { opacity: 0.5; }
+    96% { opacity: 0.8; }
+  }
+  @keyframes glitchJitter {
+    0%, 85%, 88%, 97%, 100% { transform: translate(0); }
+    86% { transform: translate(-1px); }
+    87% { transform: translate(1px, -1px); }
+    98% { transform: translate(-2px, 1px); }
+    99% { transform: translate(1px); }
+  }
+  .ep-info { text-align: center; margin-top: 32px; }
+  .ep-title {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(18px,3vw,36px); font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.15em; color: white;
+    text-shadow: 0 0 20px #00aaff66, 0 0 60px #00aaff22;
+  }
+  .ep-tagline {
+    font-size: clamp(13px,1.5vw,18px); font-style: italic;
+    color: #00aaff; margin-top: 12px;
+    text-shadow: 0 0 15px #00aaff44; letter-spacing: 0.05em;
+  }
+  .ep-desc {
+    font-size: clamp(13px,1.3vw,17px); font-weight: 300;
+    color: rgba(255,255,255,0.6); margin-top: 12px;
+    max-width: 600px; line-height: 1.6;
+  }
+  .platforms { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 120px; }
+  .tag-focus { box-shadow: 0 0 30px currentColor !important; transform: scale(1.1) !important; }
+  .platform-link {
+    display: flex; align-items: center; gap: 6px;
+    padding: 10px 20px; background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1); border-radius: 8px;
+    color: rgba(255,255,255,0.7); text-decoration: none;
+    font-size: 13px; font-weight: 500; letter-spacing: 0.05em;
+    transition: all 0.3s; backdrop-filter: blur(4px);
+  }
+  .platform-link:hover { border-color: #00aaff; color: white; box-shadow: 0 0 25px #00aaff44; transform: translateY(-2px); }
+  .platform-link .icon { font-size: 18px; }
+  .socials { display: flex; gap: 20px; margin-top: 40px; }
+  .social-link {
+    color: rgba(255,255,255,0.3); font-size: 14px;
+    text-decoration: none; letter-spacing: 0.1em; text-transform: uppercase;
+    transition: all 0.3s; position: relative;
+  }
+  .social-link:hover { color: #00aaff; text-shadow: 0 0 20px #00aaff66; }
+  .social-link::after { content: ''; position: absolute; bottom: -4px; left: 0; width: 0; height: 1px; background: #00aaff; transition: width 0.3s; }
+  .social-link:hover::after { width: 100%; }
+  .footer { margin-top: 50px; text-align: center; font-size: 12px; color: rgba(255,255,255,0.15); letter-spacing: 0.2em; font-family: 'Orbitron', monospace; }
+  .support-section { margin-top: 28px; display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
+  .support-btn {
+    padding: 8px 24px; border-radius: 6px;
+    font-family: 'Rajdhani', sans-serif; font-weight: 700;
+    font-size: 14px; letter-spacing: 0.1em; text-transform: uppercase;
+    text-decoration: none; transition: all 0.3s; border: none; cursor: pointer;
+  }
+  .btn-coffee { background: linear-gradient(135deg, #FFDD00, #FF8800); color: #1a1a1a; box-shadow: 0 0 20px rgba(255,200,0,0.3); }
+  .btn-coffee:hover { box-shadow: 0 0 40px rgba(255,200,0,0.5); transform: translateY(-2px); }
+  .btn-merch { background: transparent; color: #00cccc; border: 1px solid #00cccc; box-shadow: 0 0 15px #00cccc33; }
+  .btn-merch:hover { box-shadow: 0 0 30px #00cccc55; transform: translateY(-2px); }
+  .back-btn {
+    position: fixed; top: 20px; left: 20px; z-index: 10;
+    padding: 8px 18px; border-radius: 6px;
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15);
+    color: rgba(255,255,255,0.5); text-decoration: none;
+    font-family: 'Orbitron', monospace; font-size: 11px;
+    letter-spacing: 0.1em; transition: all 0.3s; backdrop-filter: blur(4px);
+  }
+  .back-btn:hover { border-color: #00aaff; color: #00aaff; box-shadow: 0 0 20px #00aaff44; }
+  @media (max-width:600px) { .main{padding:20px 12px 40px} .tags{gap:6px} .tag{font-size:9px;padding:4px 10px} .platform-link{font-size:11px;padding:8px 14px} }
+</style>
+</head>
+<body>
+<a class="back-btn" href="index.html">← BACK</a>
+<canvas id="gridCanvas"></canvas>
+<div class="scanlines"></div>
+<div class="vignette"></div>
+<canvas id="particles"></canvas>
+<div class="main">
+  <header class="header">
+    <img class="artist-logo" src="logoNiwdeyen.png" alt="niwdeyen">
+    <div class="subtitle">✦ RAIN · OF · LIES ✦</div>
+    <div class="tags">
+      <span class="tag tag-1">Chiptune</span>
+      <span class="tag tag-2">Metal</span>
+      <span class="tag tag-1">Cyberpunk</span>
+      <span class="tag tag-2">Industrial</span>
+    </div>
+  </header>
+  <div class="divider"></div>
+  <div class="artwork-wrapper">
+    <div class="artwork-glitch">
+      <img src="https://i.scdn.co/image/ab67616d0000b2733e7293369a6d265791367495" alt="RAIN OF LIES">
+    </div>
+  </div>
+  <div class="ep-info">
+    <div class="ep-title">RAIN OF LIES</div>
+    <div class="ep-tagline" id="tagline" data-text='&#34;Neon drops cutting through the static&#34;'></div>
+    <div class="ep-desc" id="desc" data-text='Cyberpunk noir dripping with distortion. Every note falls like a lie exposed — cold, heavy, unforgiving.'></div>
+  </div>
+  <div class="platforms">
+    <a class="platform-link" href="https://www.submithub.com/link/niwdeyen-rain-of-lies" target="_blank"><span class="icon">🎧</span> Listen Now</a>
+    <a class="platform-link" href="https://open.spotify.com/album/0rpEaYOpLpf41KmvqEvTbt" target="_blank"><span class="icon">🎧</span> Spotify</a>
+    <a class="platform-link" href="https://music.apple.com/us/album/bitblight-metropolis-corruption-ep/1741502152" target="_blank"><span class="icon">🍎</span> Apple Music</a>
+    <a class="platform-link" href="https://music.youtube.com/playlist?list=OLAK5uy_njCET254XRAilbx4ubX4Tt1eIKjhYSvRw" target="_blank"><span class="icon">▶️</span> YouTube</a>
+    <a class="platform-link" href="https://link.deezer.com/s/317RBg9Dx8KesGUsFol1L" target="_blank"><span class="icon">📻</span> Deezer</a>
+  </div>
+  <div class="support-section">
+    <a class="support-btn btn-coffee" href="https://buymeacoffee.com/niwdeyen" target="_blank">☕ Buy me a coffee</a>
+    <a class="support-btn btn-merch" href="https://niwdeyen.threadless.com/designs/bitblight-metropolis-corruption" target="_blank">🛍️ Merch</a>
+  </div>
+  <div class="socials">
+    <a class="social-link" href="https://x.com/niwdeyen" target="_blank">X</a>
+    <a class="social-link" href="https://bsky.app/profile/niwdeyen.bsky.social" target="_blank">Bluesky</a>
+    <a class="social-link" href="https://threads.net/@niwdeyen" target="_blank">Threads</a>
+    <a class="social-link" href="https://facebook.com/niwdeyen" target="_blank">Facebook</a>
+  </div>
+  <div class="footer">⚡ SIGNAL: RAIN_OF_LIES ⚡</div>
+</div>
+<script>
+const gc = document.getElementById('gridCanvas'), gx = gc.getContext('2d');
+let gw, gh;
+function resizeGrid() { gw = gc.width = innerWidth; gh = gc.height = innerHeight; }
+addEventListener('resize', resizeGrid); resizeGrid();
+const cx = () => gw/2, cy = () => gh*0.42;
+const NUM_H = 50, NUM_V = 36, FAR = 3.0;
+let waveRings = [];
+setInterval(() => waveRings.push({radius:0,intensity:1,phase:0}), 3500);
+
+function drawGrid(time) {
+  gx.clearRect(0,0,gw,gh);
+  const vx = cx(), vy = cy();
+  for(let i=waveRings.length-1;i>=0;i--){
+    const w=waveRings[i]; w.radius+=2.8; w.intensity*=0.995; w.phase+=0.06;
+    if(w.intensity<0.02) waveRings.splice(i,1);
+  }
+  function getWD(y){let d=0;for(const w of waveRings){const da=Math.abs(Math.abs(y-vy)-w.radius);if(da<80)d+=Math.sin(da*0.08+w.phase)*(1-da/80)*w.intensity*35}return d}
+  function getWG(y){let g=0;for(const w of waveRings){const da=Math.abs(Math.abs(y-vy)-w.radius);if(da<50)g+=(1-da/50)*w.intensity}return Math.min(g,1)}
+  for(let i=0;i<=NUM_H;i++){
+    const t=i/NUM_H, y=vy+t*(gh-vy)*FAR;
+    if(y>gh+20) continue;
+    const sp=t*gw*0.7, df=Math.pow(Math.max(0,(y-vy)/((gh-vy)*FAR)),2);
+    const a=Math.min(1,df*0.55), w=Math.max(0.3,t*3);
+    const wd=getWD(y), wg=getWG(y);
+    const r=Math.round(0+wg*80), gn=Math.round(150+wg*40), b=Math.round(200+wg*40);
+    gx.beginPath(); gx.moveTo(vx-sp, y+wd); gx.lineTo(vx+sp, y+wd);
+    gx.strokeStyle=`rgba(${r},${gn},${b},${a})`;
+    gx.lineWidth=w; gx.shadowBlur=w*5+wg*30;
+    gx.shadowColor=`rgba(${r},${gn},${b},${a*0.6})`;
+    gx.stroke(); gx.shadowBlur=0;
+    if(wg>0.05&&t>0.3){gx.beginPath();gx.moveTo(vx-sp*1.1,y+wd);gx.lineTo(vx+sp*1.1,y+wd);gx.strokeStyle=`rgba(${r},${gn},${b},${wg*0.15})`,gx.lineWidth=w*6,gx.stroke()}
+  }
+  for(let i=-(NUM_V/2);i<=NUM_V/2;i++){
+    gx.beginPath(); let started=false, maxA=0;
+    for(let j=0;j<=60;j++){
+      const t2=j/60, y=vy+t2*(gh-vy)*FAR;
+      if(y<0)continue;
+      const sp=t2*gw*0.7, x=vx+(i/(NUM_V/2))*sp, wd=getWD(y), wg=getWG(y);
+      const df=Math.pow(Math.max(0,(y-vy)/((gh-vy)*FAR)),2);
+      const a=Math.min(0.3,df*0.25+Math.abs(i)/(NUM_V/2)*0.08); maxA=Math.max(maxA,a);
+      const r=Math.round(180+wg*75), gn=0, b=Math.round(200+wg*55);
+      if(!started){gx.moveTo(x,y+wd);started=true}else gx.lineTo(x,y+wd)
+    }
+    gx.strokeStyle=`rgba(200,0,255,${Math.min(maxA,0.25)})`;
+    gx.lineWidth=0.8; gx.shadowBlur=6; gx.shadowColor=`rgba(200,0,255,${maxA*0.3})`;
+    gx.stroke(); gx.shadowBlur=0;
+  }
+  for(const w of waveRings){
+    const a=w.intensity*0.5;
+    gx.beginPath(); gx.arc(vx,vy,w.radius,0,Math.PI*2);
+    gx.strokeStyle=`rgba(0,150,200,${a})`;
+    gx.lineWidth=w.intensity*6+2; gx.shadowBlur=40; gx.shadowColor=`rgba(0,150,200,${a*0.8})`;
+    gx.stroke(); gx.shadowBlur=0;
+    gx.beginPath(); gx.arc(vx,vy,w.radius*0.65,0,Math.PI*2);
+    gx.strokeStyle=`rgba(0,180,255,${a*0.4})`;
+    gx.lineWidth=w.intensity*3; gx.shadowBlur=25; gx.shadowColor=`rgba(0,180,255,${a*0.5})`;
+    gx.stroke(); gx.shadowBlur=0;
+    if(w.radius<800){const g=gx.createRadialGradient(vx,vy,0,vx,vy,w.radius);g.addColorStop(0,`rgba(0,255,255,0)`);g.addColorStop(0.4,`rgba(0,150,200,${a*0.03})`);g.addColorStop(0.7,`rgba(0,180,255,${a*0.04})`);g.addColorStop(1,`rgba(0,255,255,0)`);gx.fillStyle=g;gx.beginPath();gx.arc(vx,vy,w.radius,0,Math.PI*2);gx.fill()}
+  }
+}
+const pc=document.getElementById('particles'),px=pc.getContext('2d');let particles=[],pw,ph;
+function resizeParticles(){pw=pc.width=innerWidth;ph=pc.height=innerHeight}
+addEventListener('resize',resizeParticles);resizeParticles();
+class Particle{
+  constructor(){this.reset()}
+  reset(){this.x=Math.random()*pw;this.y=Math.random()*ph;this.size=Math.random()*2.5+0.3;this.speedY=-(Math.random()*0.8+0.05);this.speedX=(Math.random()-0.5)*0.2;this.opacity=Math.random()*0.5+0.15;this.color=Math.random()>0.55?[0, 180, 255]:[0, 220, 220];this.life=Math.random()*400+100;this.maxLife=this.life}
+  update(){this.x+=this.speedX;this.y+=this.speedY;this.life--;this.opacity=Math.max(0,(this.life/this.maxLife)*0.5);if(this.life<=0||this.y<-10)this.reset()}
+  draw(){const[r,g,b]=this.color;px.beginPath();px.arc(this.x,this.y,this.size,0,Math.PI*2);px.fillStyle=`rgba(${r},${g},${b},${this.opacity})`;px.fill();px.shadowBlur=12;px.shadowColor=`rgba(${r},${g},${b},${this.opacity*0.4})`;px.fill();px.shadowBlur=0}
+}
+for(let i=0;i<150;i++)particles.push(new Particle());
+let startTime=performance.now();
+function mainLoop(t){drawGrid((t-startTime)/1000);px.clearRect(0,0,pw,ph);for(const p of particles){p.update();p.draw()}requestAnimationFrame(mainLoop)}
+requestAnimationFrame(mainLoop);
+
+function typeWriter(el, text, targetColor, neonColors, speed, cb) {
+  el.textContent = '';
+  let i = 0;
+  function step() {
+    if (i >= text.length) { if (cb) cb(); return; }
+    const ch = text[i];
+    if (ch === '\n') {
+      el.appendChild(document.createElement('br'));
+      i++;
+      setTimeout(step, speed);
+      return;
+    }
+    const span = document.createElement('span');
+    span.textContent = ch === ' ' ? '\u00A0' : ch;
+    const nc = neonColors[i % neonColors.length];
+    span.style.transition = 'color 0.6s ease, text-shadow 0.6s ease';
+    span.style.color = nc;
+    span.style.textShadow = `0 0 10px ${nc}`;
+    el.appendChild(span);
+    void span.offsetWidth;
+    span.style.color = targetColor;
+    span.style.textShadow = 'none';
+    i++;
+    setTimeout(step, speed);
+  }
+  step();
+}
+
+const tagline = document.getElementById('tagline');
+const desc = document.getElementById('desc');
+const neonTagline = ['#00ffff', '#ff00ff', '#ffff00', '#ffffff', '#00ff88'];
+const neonDesc = ['#00aaff', '#00ffff', '#ff00ff', '#ffff44', '#00ff88'];
+typeWriter(tagline, tagline.dataset.text, '#00aaff', neonTagline, 22, () => {
+  setTimeout(() => typeWriter(desc, desc.dataset.text, 'rgba(255,255,255,0.6)', neonDesc, 9), 500);
+});
+
+const tags = document.querySelectorAll('.tag');
+tags.forEach(t => {
+  function schedule() {
+    const delay = 2000 + Math.random() * 6000;
+    setTimeout(() => {
+      t.classList.add('tag-focus');
+      setTimeout(() => {
+        t.classList.remove('tag-focus');
+        schedule();
+      }, 400 + Math.random() * 500);
+    }, delay);
+  }
+  schedule();
+});
+</script>
+</body>
+</html>

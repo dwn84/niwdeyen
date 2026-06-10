@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>niwdeyen — Discography</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:#050508;color:white;font-family:'Rajdhani',sans-serif;min-height:100vh;overflow-x:hidden}
+  .scanlines{position:fixed;inset:0;z-index:0;pointer-events:none;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.15) 2px,rgba(0,0,0,0.15) 4px)}
+  .vignette{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 40%,rgba(0,0,0,0.9) 100%)}
+  canvas#three-canvas{position:fixed;inset:0;z-index:10;pointer-events:none;display:block;clip-path:inset(100% 0 0 100%);animation:emergeFromCorner 2.5s ease-out 0.3s forwards}
+  canvas#particles-bg{position:fixed;inset:0;z-index:1;pointer-events:none;display:block}
+  @keyframes emergeFromCorner{to{clip-path:inset(0)}}
+  .main{position:relative;z-index:2;max-width:1100px;margin:0 auto;padding:50px 20px 80px;display:flex;flex-direction:column;align-items:center}
+  .artist-logo{max-width:min(70vw,340px);height:auto;margin-bottom:8px;display:block;position:relative;z-index:1}
+  .logo-glitch{position:relative;display:inline-block;margin-bottom:8px;animation:logoJitter 8s steps(1) infinite}
+  .logo-glitch::before{content:'';position:absolute;inset:0;z-index:2;pointer-events:none;background:linear-gradient(90deg,transparent,rgba(0,255,255,0.12),rgba(255,0,255,0.12),transparent);animation:glareSweep 4s ease-in-out infinite}
+  .logo-glitch::after{content:'';position:absolute;inset:0;z-index:3;pointer-events:none;animation:logoGlitchFlash 6s steps(1) infinite}
+  @keyframes logoJitter{0%,90%,92%,97%,100%{transform:translate(0)}91%{transform:translate(-2px,1px)}93%{transform:translate(1px,-1px)}98%{transform:translate(-1px,0)}99%{transform:translate(2px,1px)}}
+  @keyframes glareSweep{0%{transform:translateX(-110%)}20%{transform:translateX(110%)}50%{transform:translateX(110%)}70%{transform:translateX(-110%)}100%{transform:translateX(-110%)}}
+  @keyframes logoGlitchFlash{0%,78%,80%,86%,88%,94%,96%,100%{opacity:0}79%{opacity:1;background:rgba(0,255,255,0.06);clip-path:inset(15% 0 65% 0)}87%{opacity:1;background:rgba(255,0,255,0.05);clip-path:inset(55% 0 25% 0)}95%{opacity:1;background:rgba(0,255,255,0.04);clip-path:inset(30% 0 55% 0)}}
+  .subtitle{font-size:clamp(12px,1.5vw,18px);font-weight:300;letter-spacing:0.5em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-top:8px;text-align:center;animation:neonPulse 3s ease-in-out infinite alternate}
+  @keyframes neonPulse{0%{text-shadow:0 0 4px #00ffff,0 0 8px #00ffff,0 0 16px #ff00ff;color:rgba(255,255,255,0.3)}50%{text-shadow:0 0 8px #ff00ff,0 0 20px #ff00ff,0 0 40px #00ffff;color:rgba(255,255,255,0.7)}100%{text-shadow:0 0 4px #00ffff,0 0 12px #ff00ff,0 0 24px #00ffff;color:rgba(255,255,255,0.5)}}
+  .divider{width:400px;max-width:80vw;height:2px;background:linear-gradient(90deg,transparent,#ff00ff,#00ffff,transparent);margin:30px 0 40px;box-shadow:0 0 30px rgba(255,0,255,0.3)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;width:100%;max-width:1000px}
+  .card{position:relative;border-radius:14px;padding:4px;background:linear-gradient(135deg,#ff00ff,#00ffff);transition:all 0.4s;cursor:pointer}
+  .card:hover{transform:translateY(-6px);box-shadow:0 0 50px rgba(255,0,255,0.3),0 0 80px rgba(0,255,255,0.15)}
+  .card-inner{background:#0a0a14;border-radius:12px;padding:28px 24px;height:100%;display:flex;flex-direction:column;align-items:center;text-align:center}
+  .card-icon{font-size:40px;margin-bottom:12px}
+  .card-title{font-family:'Orbitron',monospace;font-size:18px;font-weight:700;letter-spacing:0.1em;color:white;text-transform:uppercase}
+  .card-tagline{font-size:13px;color:rgba(255,255,255,0.5);margin-top:6px;font-style:italic}
+  .card-desc{font-size:13px;color:rgba(255,255,255,0.35);margin-top:10px;line-height:1.5}
+  .card-theme{font-size:10px;font-family:'Orbitron',monospace;letter-spacing:0.2em;text-transform:uppercase;margin-top:12px;padding:4px 12px;border-radius:4px;border:1px solid}
+  .card-link{position:absolute;inset:0;z-index:1;border-radius:14px}
+  .tags{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:20px}
+  .tag{font-family:'Orbitron',monospace;font-size:10px;letter-spacing:0.15em;padding:5px 14px;border-radius:4px;text-transform:uppercase;border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.4)}
+  .footer{margin-top:50px;text-align:center;font-size:11px;color:rgba(255,255,255,0.12);letter-spacing:0.3em;font-family:'Orbitron',monospace}
+  @media(max-width:600px){.main{padding:30px 14px 50px}.grid{grid-template-columns:1fr}.card{padding:3px}.card-inner{padding:20px 16px}}
+</style>
+</head>
+<body>
+<div class="scanlines"></div>
+<div class="vignette"></div>
+<canvas id="three-canvas"></canvas>
+<canvas id="particles-bg"></canvas>
+<div class="main">
+  <div class="logo-glitch"><img class="artist-logo" src="logoNiwdeyen.png" alt="niwdeyen"></div>
+  <div class="subtitle">✦ DISCOGRAPHY ✦</div>
+  <div class="tags">
+    <span class="tag">CHIPTUNE</span>
+    <span class="tag">METAL</span>
+    <span class="tag">CYBERPUNK</span>
+    <span class="tag">INDUSTRIAL</span>
+  </div>
+  <div class="divider"></div>
+  <div class="grid">
+    <div class="card">
+      <a class="card-link" href="ep-bitblight.html"></a>
+      <div class="card-inner">
+        <div class="card-icon">💿</div>
+        <div class="card-title" style="color:#ff00ff">BitBlight:<br>Metropolis Corruption</div>
+        <div class="card-tagline" style="color:rgba(255,0,255,0.6)">"8-Bit nostalgia crushed by heavy metal distortion"</div>
+        <div class="card-desc" style="color:rgba(0,255,255,0.5)">The full EP experience — 5 tracks of cyberpunk mayhem</div>
+        <div class="card-theme" style="border-color:#ff00ff;color:#ff00ff">EP · Cyberpunk</div>
+      </div>
+    </div>
+    <div class="card">
+      <a class="card-link" href="single-robot-army.html"></a>
+      <div class="card-inner">
+        <div class="card-icon">🤖</div>
+        <div class="card-title" style="color:#ff4400">Robot Army</div>
+        <div class="card-tagline" style="color:rgba(255,68,0,0.6)">"Metallic march into digital warfare"</div>
+        <div class="card-desc" style="color:rgba(255,34,0,0.5)">Heavy riffs and 8-bit battle cries collide</div>
+        <div class="card-theme" style="border-color:#ff2200;color:#ff4400">Military · Industrial</div>
+      </div>
+    </div>
+    <div class="card">
+      <a class="card-link" href="single-rain-of-lies.html"></a>
+      <div class="card-inner">
+        <div class="card-icon">⚡</div>
+        <div class="card-title" style="color:#00aaff">Rain of Lies</div>
+        <div class="card-tagline" style="color:rgba(0,170,255,0.6)">"Neon drops cutting through the static"</div>
+        <div class="card-desc" style="color:rgba(0,170,255,0.5)">Cyberpunk noir dripping with distortion</div>
+        <div class="card-theme" style="border-color:#00aaff;color:#00aaff">Noir · Dark</div>
+      </div>
+    </div>
+    <div class="card">
+      <a class="card-link" href="single-data-breach.html"></a>
+      <div class="card-inner">
+        <div class="card-icon">💾</div>
+        <div class="card-title" style="color:#ff4400">Data Breach</div>
+        <div class="card-tagline" style="color:rgba(255,68,0,0.6)">"The firewall is down. Enter the void."</div>
+        <div class="card-desc" style="color:rgba(255,34,0,0.5)">A digital intrusion set to music</div>
+        <div class="card-theme" style="border-color:#ff2200;color:#ff4400">Hacker · Digital</div>
+      </div>
+    </div>
+    <div class="card">
+      <a class="card-link" href="single-critical-hit.html"></a>
+      <div class="card-inner">
+        <div class="card-icon">⚔️</div>
+        <div class="card-title" style="color:#0088ff">Critical Hit</div>
+        <div class="card-tagline" style="color:rgba(0,136,255,0.6)">"Maximum damage. No save points."</div>
+        <div class="card-desc" style="color:rgba(0,102,255,0.5)">8-bit power-up meets metal breakdown</div>
+        <div class="card-theme" style="border-color:#0066ff;color:#0088ff">Arcade · Gaming</div>
+      </div>
+    </div>
+    <div class="card">
+      <a class="card-link" href="single-cipher-decoder.html"></a>
+      <div class="card-inner">
+        <div class="card-icon">🔐</div>
+        <div class="card-title" style="color:#00ddcc">Cipher Decoder</div>
+        <div class="card-tagline" style="color:rgba(0,221,204,0.6)">"Crack the code. Unlock the chaos."</div>
+        <div class="card-desc" style="color:rgba(0,204,187,0.5)">A labyrinth of 8-bit encryption and metal distortion</div>
+        <div class="card-theme" style="border-color:#00ccbb;color:#00ddcc">Cypher · Mystery</div>
+      </div>
+    </div>
+  </div>
+  <div class="support-section" style="margin-top:40px;display:flex;gap:14px;flex-wrap:wrap;justify-content:center">
+    <a class="support-btn" href="https://buymeacoffee.com/niwdeyen" target="_blank" style="padding:10px 28px;border-radius:6px;background:linear-gradient(135deg,#FFDD00,#FF8800);color:#1a1a1a;font-weight:700;font-size:14px;letter-spacing:0.1em;text-transform:uppercase;text-decoration:none;box-shadow:0 0 20px rgba(255,200,0,0.3)">☕ Buy me a coffee</a>
+    <a class="support-btn" href="https://niwdeyen.threadless.com/designs/bitblight-metropolis-corruption" target="_blank" style="padding:10px 28px;border-radius:6px;background:transparent;color:#00ffff;border:1px solid #00ffff;font-weight:700;font-size:14px;letter-spacing:0.1em;text-transform:uppercase;text-decoration:none;box-shadow:0 0 15px rgba(0,255,255,0.15)">🛍️ Merch</a>
+  </div>
+  <div class="footer">⚡ SELECT YOUR FREQUENCY ⚡</div>
+</div>
+
+<script id="vertexShader" type="x-shader/x-vertex">
+varying vec3 vColor;
+varying float vAlpha;
+uniform float time;
+uniform float phi;
+uniform int activeDim;
+
+vec3 fold(vec3 p, vec3 n) {
+    return p - 2.0 * min(0.0, dot(p, n)) * n;
+}
+
+void main() {
+    float idx = position.x;
+    float angle = idx * 137.508 * (3.14159265 / 180.0);
+    float dist = sqrt(idx) * 0.18;
+    vec3 p = vec3(cos(angle) * dist, sin(angle) * dist, 0.0);
+    
+    for(int i = 0; i < 24; i++) {
+        if(i >= activeDim) break;
+        float f = float(i) * phi;
+        vec3 n = normalize(vec3(cos(f), sin(f + time * 0.1), sin(f * 0.5)));
+        p = fold(p, n);
+        p *= 1.12;
+        p -= n * 0.18;
+    }
+
+    float s = sin(time * 0.3);
+    float c = cos(time * 0.3);
+    p.xy *= mat2(c, -s, s, c);
+    p.z += sin(time + idx * 0.05) * 1.5;
+    p += vec3(0.0, 7.5, 0.0);
+
+    vColor = mix(vec3(0.0, 0.8, 1.0), vec3(1.0, 0.7, 0.0), float(activeDim) / 24.0);
+    if(mod(idx, 13.0) < 1.0) vColor = vec3(1.0, 1.0, 1.0);
+
+    vAlpha = clamp(3.0 / length(p + 0.1), 0.1, 1.0);
+    
+    vec4 mvPosition = modelViewMatrix * vec4(p, 1.0);
+    gl_PointSize = (45.0 / -mvPosition.z) * (0.8 + 0.5 * sin(time + idx));
+    gl_Position = projectionMatrix * mvPosition;
+}
+</script>
+
+<script id="fragmentShader" type="x-shader/x-fragment">
+varying vec3 vColor;
+varying float vAlpha;
+void main() {
+    float d = distance(gl_PointCoord, vec2(0.5));
+    if(d > 0.5) discard;
+    float glow = pow(1.0 - d * 2.0, 2.0);
+    gl_FragColor = vec4(vColor, vAlpha * glow);
+}
+</script>
+
+<script>
+let scene, camera, renderer, points;
+
+function init() {
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 2000);
+    
+    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, canvas: document.getElementById('three-canvas') });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+
+    const geometry = new THREE.BufferGeometry();
+    const count = 8000;
+    const positions = new Float32Array(count * 3);
+    for(let i = 0; i < count; i++) { positions[i*3] = i; }
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+    const material = new THREE.ShaderMaterial({
+        uniforms: {
+            time: { value: 0 },
+            phi: { value: 1.618 },
+            activeDim: { value: 6 }
+        },
+        vertexShader: document.getElementById('vertexShader').textContent,
+        fragmentShader: document.getElementById('fragmentShader').textContent,
+        transparent: true,
+        blending: THREE.AdditiveBlending,
+        depthTest: false
+    });
+
+    points = new THREE.Points(geometry, material);
+    scene.add(points);
+    camera.position.z = 18;
+    animate();
+}
+
+function animate() {
+    requestAnimationFrame(animate);
+    const time = performance.now() * 0.001;
+    points.material.uniforms.time.value = time;
+    camera.position.x = Math.sin(time * 0.1) * 2.0;
+    camera.position.y = Math.cos(time * 0.1) * 2.0;
+    camera.lookAt(0, 0, 0);
+    renderer.render(scene, camera);
+}
+
+window.onload = init;
+window.onresize = () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+};
+</script>
+<script>
+const c=document.getElementById('particles-bg'),x=c.getContext('2d');let p=[],w,h;
+function r(){w=c.width=innerWidth;h=c.height=innerHeight}
+addEventListener('resize',r);r();
+class P{constructor(){this.reset()}reset(){this.x=Math.random()*w;this.y=Math.random()*h;this.size=Math.random()*2+0.3;this.sy=-(Math.random()*0.6+0.05);this.sx=(Math.random()-0.5)*0.2;this.o=Math.random()*0.4+0.1;this.c=Math.random()>0.5?[0,255,255]:[255,0,255];this.l=Math.random()*300+100;this.m=this.l}update(){this.x+=this.sx;this.y+=this.sy;this.l--;this.o=Math.max(0,(this.l/this.m)*0.4);if(this.l<=0||this.y<-10)this.reset()}draw(){const[r,g,b]=this.c;x.beginPath();x.arc(this.x,this.y,this.size,0,Math.PI*2);x.fillStyle=`rgba(${r},${g},${b},${this.o})`;x.fill();x.shadowBlur=10;x.shadowColor=`rgba(${r},${g},${b},${this.o*0.4})`;x.fill();x.shadowBlur=0}}
+for(let i=0;i<100;i++)p.push(new P());
+function loop(){x.clearRect(0,0,w,h);for(const q of p){q.update();q.draw()}requestAnimationFrame(loop)}
+loop();
+</script>
+</body>
+</html>

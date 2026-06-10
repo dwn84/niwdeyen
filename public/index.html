@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Music Visualizer</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div id="inputScreen" class="screen active">
+    <div class="input-card">
+      <h1>Music Visualizer</h1>
+      <p class="sub">Cargá tu arte, tu audio y creá un visualizer único</p>
+
+      <div class="upload-group">
+        <label class="upload-box" id="imageBox">
+          <input type="file" id="imageInput" accept="image/*" hidden />
+          <span class="upload-icon">🖼️</span>
+          <span class="upload-label">Portada / Album art</span>
+          <span class="upload-name" id="imageName"></span>
+        </label>
+
+        <label class="upload-box" id="audioBox">
+          <input type="file" id="audioInput" accept="audio/*" hidden />
+          <span class="upload-icon">🎧</span>
+          <span class="upload-label">Archivo de audio</span>
+          <span class="upload-name" id="audioName"></span>
+        </label>
+      </div>
+
+      <div class="text-inputs">
+        <input type="text" id="artistInput" class="meta-input" placeholder="Nombre del Artista" maxlength="40" />
+        <input type="text" id="titleInput" class="meta-input" placeholder="Título de la Canción" maxlength="50" />
+      </div>
+
+      <div class="style-section">
+        <p class="style-label">Estilo</p>
+        <div class="style-grid">
+          <label class="style-card selected" data-style="bars">
+            <input type="radio" name="style" value="bars" checked hidden />
+            <div class="style-preview">
+              <div class="preview-bars"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            </div>
+            <span class="style-name">Spectrum</span>
+          </label>
+          <label class="style-card" data-style="wave">
+            <input type="radio" name="style" value="wave" hidden />
+            <div class="style-preview">
+              <svg viewBox="0 0 60 40"><path d="M0,20 Q5,5 10,20 T20,20 T30,20 T40,20 T50,20 T60,20" fill="none" stroke="#fff" stroke-width="1.5"/><path d="M0,20 Q5,35 10,20 T20,20 T30,20 T40,20 T50,20 T60,20" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="1"/></svg>
+            </div>
+            <span class="style-name">Fluid Wave</span>
+          </label>
+          <label class="style-card" data-style="oscilloscope">
+            <input type="radio" name="style" value="oscilloscope" hidden />
+            <div class="style-preview">
+              <svg viewBox="0 0 60 40"><polyline points="0,30 5,28 10,32 15,25 20,20 25,18 30,15 35,20 40,25 45,22 50,28 55,26 60,30" fill="none" stroke="#0f0" stroke-width="1"/><polyline points="0,10 5,12 10,8 15,15 20,20 25,22 30,25 35,20 40,15 45,18 50,12 55,14 60,10" fill="none" stroke="rgba(0,255,0,0.3)" stroke-width="1"/></svg>
+            </div>
+            <span class="style-name">Osciloscopio</span>
+          </label>
+          <label class="style-card" data-style="vinyl">
+            <input type="radio" name="style" value="vinyl" hidden />
+            <div class="style-preview">
+              <svg viewBox="0 0 60 40"><circle cx="30" cy="20" r="14" fill="none" stroke="#fff" stroke-width="1"/><circle cx="30" cy="20" r="10" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="0.5"/><circle cx="30" cy="20" r="5" fill="#fff" opacity="0.3"/><circle cx="30" cy="20" r="2" fill="#fff"/></svg>
+            </div>
+            <span class="style-name">Vinilo</span>
+          </label>
+          <label class="style-card" data-style="particles">
+            <input type="radio" name="style" value="particles" hidden />
+            <div class="style-preview">
+              <svg viewBox="0 0 60 40"><circle cx="10" cy="8" r="1.5" fill="#fff"/><circle cx="25" cy="15" r="1" fill="#fff"/><circle cx="45" cy="10" r="2" fill="#fff"/><circle cx="50" cy="30" r="1.5" fill="#fff"/><circle cx="15" cy="32" r="1" fill="#fff"/><circle cx="35" cy="25" r="2" fill="#fff"/><circle cx="55" cy="18" r="1" fill="#fff"/><circle cx="5" cy="22" r="1.5" fill="#fff"/></svg>
+            </div>
+            <span class="style-name">Partículas</span>
+          </label>
+          <label class="style-card" data-style="fullframe">
+            <input type="radio" name="style" value="fullframe" hidden />
+            <div class="style-preview">
+              <div class="preview-full"><span></span><span></span><span></span><span></span><span></span></div>
+            </div>
+            <span class="style-name">Full Frame</span>
+          </label>
+        </div>
+      </div>
+
+      <button id="startBtn" class="start-btn" disabled>Crear Visualizer</button>
+      <p id="errorMsg" class="error hidden"></p>
+    </div>
+  </div>
+
+  <div id="vizScreen" class="screen">
+    <div id="artBg" class="art-bg"></div>
+      <button id="backBtn" class="back-btn">← Volver</button>
+      <button id="orientBtn" class="orient-btn" title="Cambiar orientación">🔄</button>
+      <button id="replayBtn" class="replay-btn" title="Reproducir de nuevo">⏮️</button>
+
+      <div class="viz-content" id="vizContent">
+      <div class="phone-frame">
+        <div class="frame-inner">
+          <img id="albumArt" class="album-art" alt="album art" />
+          <canvas id="mainCanvas" class="main-canvas"></canvas>
+          <div id="textOverlay" class="text-overlay">
+            <div id="displayArtist" class="display-artist"></div>
+            <div id="displayTitle" class="display-title"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
