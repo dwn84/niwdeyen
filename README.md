@@ -1,7 +1,5 @@
 # niwdeyen — Discography
 
-![niwdeyen](logoNiwdeyen.png)
-
 8-Bit Nostalgia Crushed by Modern Metal Distortion.
 
 Independent chiptune-metal artist from Antioquia, Colombia. Fuses nostalgic 8-bit retro video game sounds with heavy modern metal riffs, digital synths, and dark cyberpunk atmospheres.
